@@ -4,3 +4,7 @@
 
 - Emanuel Patiño
 - Carlos Mazo
+
+## Tests
+
+![Tests](https://i.ibb.co/DPwjNPRh/Tests.png)

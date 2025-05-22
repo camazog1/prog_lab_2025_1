@@ -1,23 +1,32 @@
-from threading import Condition
+from threading import Semaphore
 
 class RendezvousDEchange:
     def __init__(self):
-        self.condition = Condition()
+        self.semaphore_first = Semaphore(0) 
+        self.semaphore_second = Semaphore(0) 
         self.first_value = None
+        self.second_value = None
         self.has_first = False
+        self.has_second = False
 
     def echanger(self, value):
-        with self.condition:
-            if not self.has_first:
-                self.first_value = value
-                self.has_first = True
-                self.condition.wait()
-                other_value = self.second_value
-                self.has_first = False
-                self.condition.notify()
-                return other_value
-            else:
-                self.second_value = value
-                self.condition.notify()
-                self.condition.wait()
-                return self.first_value
+        if not self.has_first:
+            self.first_value = value
+            self.has_first = True
+
+            self.semaphore_second.acquire()
+            result = self.second_value
+
+            self.has_first = False
+            self.has_second = False
+
+            self.semaphore_first.release()
+            return result
+        else:
+            self.second_value = value
+            self.has_second = True
+
+            self.semaphore_second.release()
+
+            self.semaphore_first.acquire()
+            return self.first_value
